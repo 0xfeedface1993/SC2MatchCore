@@ -87,7 +87,7 @@ public func save(zones: [String], completion: ExcuteCompletion?) {
     completion?(true)
 }
 
-/// 删除战队，根据id删除
+/// 删除赛区，根据id删除
 ///
 /// - Parameters:
 ///   - zone: 赛区ID
@@ -106,7 +106,7 @@ public func remove(zoneID: Int, completion: ExcuteCompletion?) {
     }
 }
 
-/// 删除战队，根据名称删除
+/// 删除赛区，根据名称删除
 ///
 /// - Parameters:
 ///   - zone: 赛区名称

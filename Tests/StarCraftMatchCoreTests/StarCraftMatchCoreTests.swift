@@ -58,8 +58,24 @@ final class StarCraftMatchCoreTests: XCTestCase {
         deleteAllTeamZoneRecords()
         
         let teams = [("熊猫战队", "A"), ("北京战队", "B"), ("昆明战队", "C"), ("斗鱼战队", "D")]
+        
+        // 批量保存数据
         save(teamPack: teams) { (isSuccess) in
             XCTAssert(isSuccess, "*** 批量插入或更新战队数据失败")
+        }
+        
+        let t = Team()
+        try? t.findAll()
+        let rows = t.rows()
+        
+        // 更新战队信息
+        update(team: rows[0].id, value: (team: "bilibili闪电", manager: "大风车")) { (isSuccess) in
+            XCTAssert(isSuccess, "*** 更新战队数据失败")
+        }
+        
+        // 删除战队
+        remove(teamID: rows[0].id) { (isSuccess) in
+            XCTAssert(isSuccess, "*** 删除战队赛区数据失败")
         }
     }
 }

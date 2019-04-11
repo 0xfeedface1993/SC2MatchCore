@@ -88,3 +88,78 @@ public func save(teamPack: [(team: String, manager: String)], completion: Excute
         completion?(true)
     }
 }
+
+/// 删除战队，根据id
+///
+/// - Parameters:
+///   - teamID:战队id
+///   - completion: 执行回调，成功返回true
+public func remove(teamID: Int, completion: ExcuteCompletion?) {
+    let data = Team()
+    do {
+        try data.update(data: [("activeState", 0)], idValue: teamID)
+        try data.get(teamID)
+        log(message: "------ delete team: \(data.name), \(data.mananger), state: \(data.activeState)")
+        completion?(true)
+    } catch {
+        print(error)
+        log(error: error.localizedDescription)
+        completion?(false)
+    }
+}
+
+/// 删除战队，根据名称删除
+///
+/// - Parameters:
+///   - zone: 战队名称
+///   - completion: 执行回调，成功返回true
+public func remove(teamName: String, completion: ExcuteCompletion?) {
+    let data = Team()
+    do {
+        try data.find([("name", teamName), ("activeState", "1")])
+        if data.id != 0 {
+            let rows = data.rows()
+            for row in rows {
+                let oldValue = row.name
+                row.activeState = 0
+                try row.save()
+                log(message: "------ delete team: \(oldValue)")
+            }
+            completion?(true)
+        }   else    {
+            completion?(false)
+        }
+    } catch {
+        print(error)
+        log(error: error.localizedDescription)
+        completion?(false)
+    }
+}
+
+/// 更新战队记录
+///
+/// - Parameters:
+///   - team: 战队id
+///   - value: 战队信息
+///   - completion: 执行回调，成功返回true
+public func update(team: Int, value: (team: String, manager: String), completion: ExcuteCompletion?) {
+    let data = Team()
+    do {
+        try data.get(team)
+        let oldName = data.name
+        guard data.activeState > 0 else {
+            log(message: "****** team: \(oldName) state is \(data.activeState)")
+            completion?(false)
+            return
+        }
+        data.name = value.team
+        data.mananger = value.manager
+        try data.save()
+        log(message: ">>>>>> update team: \(oldName) -> \(data.name)")
+        completion?(true)
+    } catch {
+        print(error)
+        log(error: error.localizedDescription)
+        completion?(false)
+    }
+}

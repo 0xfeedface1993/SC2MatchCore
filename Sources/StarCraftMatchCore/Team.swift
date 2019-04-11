@@ -10,35 +10,6 @@ import SQLiteStORM
 
 public typealias ExcuteCompletion = (Bool) -> ()
 
-/// 赛区
-public class Zone: SQLiteStORM {
-    var id: Int = 0
-    /// 赛区名
-    var name: String = ""
-    /// 删除标记
-    var state: Bool = true
-    
-    override open func table() -> String {
-        return "zone"
-    }
-    
-    override public func to(_ this: StORMRow) {
-        id = this.data["id"] as? Int ?? 0
-        name = this.data["name"] as? String ?? ""
-        state = this.data["state"] as? Bool ?? false
-    }
-    
-    func rows() -> [Zone] {
-        var rows = [Zone]()
-        for i in 0..<self.results.rows.count {
-            let item = Zone()
-            item.to(self.results.rows[i])
-            rows.append(item)
-        }
-        return rows
-    }
-}
-
 /// 战队
 public class Team: SQLiteStORM {
     var id: Int = 0
@@ -47,7 +18,7 @@ public class Team: SQLiteStORM {
     /// 负责人（默认经理）
     var mananger: String = ""
     /// 删除标记
-    var state: Bool = true
+    var activeState: Int = 0
     
     override open func table() -> String {
         return "team"
@@ -57,7 +28,7 @@ public class Team: SQLiteStORM {
         id = this.data["id"] as? Int ?? 0
         name = this.data["name"] as? String ?? ""
         mananger = this.data["mananger"] as? String ?? ""
-        state = this.data["state"] as? Bool ?? false
+        activeState = this.data["activeState"] as? Int ?? 0
     }
     
     func rows() -> [Team] {
@@ -71,57 +42,49 @@ public class Team: SQLiteStORM {
     }
 }
 
-/// 赛区-战队关系
-public class TeamInZone: SQLiteStORM {
-    var id: Int = 0
-    var teamid: Int = 0
-    var zoneid: Int = 0
-    /// 删除标记
-    var state: Bool = true
-    
-    override open func table() -> String {
-        return "team_relate_zone"
+/// 保存战队信息，根据战队名查找存在记录，如果存在则更新记录
+///
+/// - Parameters:
+///   - team: 战队名
+///   - manager: 战队管理员
+///   - completion: 执行回调，成功返回true
+public func save(team: String, manager: String, completion: ExcuteCompletion?) {
+    let data = Team()
+    do {
+        try data.find([("name", team)])
+        data.activeState = 1
+        data.name = team
+        data.mananger = manager
+        try data.save(set: { (id) in
+            data.id = id as! Int
+        })
+        log(message: ">>>>>> update zone: \(data.name), state: \(data.activeState)")
+        completion?(true)
+    } catch {
+        print(error)
+        log(error: error.localizedDescription)
+        completion?(false)
     }
-    
-    override public func to(_ this: StORMRow) {
-        id = this.data["id"] as? Int ?? 0
-        teamid = this.data["deviceid"] as? Int ?? 0
-        zoneid = this.data["userid"] as? Int ?? 0
-        state = this.data["state"] as? Bool ?? false
-    }
-    
-    func rows() -> [TeamInZone] {
-        var rows = [TeamInZone]()
-        for i in 0..<self.results.rows.count {
-            let item = TeamInZone()
-            item.to(self.results.rows[i])
-            rows.append(item)
-        }
-        return rows
-    }
-    
-    /// 请求赛区内战队列表
-    ///
-    /// - Parameter zone: 赛区id
-    /// - Returns: 赛区+战队列表，若没有有效战队信息则返回nil
-    func request(teamInZone zone: Int) -> (Zone, [Team])? {
-        do {
-            try self.find([("zoneid", zone), ("state", true)])
-            let zone = Zone()
-            try zone.get(zoneid)
-            var teams = [Team]()
-            for item in self.rows() {
-                let team = Team()
-                try? team.get(item.teamid)
-                guard team.id != 0 else { continue }
-                teams.append(team)
+}
+
+/// 保存或更新多条战队记录
+///
+/// - Parameters:
+///   - teamPack: 战队信息，包含战队名和战队负责人
+///   - completion: 执行回调，成功返回true
+public func save(teamPack: [(team: String, manager: String)], completion: ExcuteCompletion?) {
+    var count = 0
+    for item in teamPack {
+        save(team: item.team, manager: item.manager) { (isSuccess) in
+            if isSuccess {
+                count += 1
             }
-            log(message: "<<<<<< request team in zone: \(self.zoneid)")
-            return (zone, teams)
-        } catch {
-            print(error)
-            log(error: error.localizedDescription)
-            return nil
         }
+    }
+    if count != teamPack.count {
+        log(message: "****** shold save: \(teamPack.count) record, only save: \(count) record")
+        completion?(false)
+    }   else    {
+        completion?(true)
     }
 }

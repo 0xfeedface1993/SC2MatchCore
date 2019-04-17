@@ -10,7 +10,7 @@ import SQLiteStORM
 
 /// 初始化数据库
 public func configDatabase() {
-    SQLiteConnector.db = "./sc2bc"
+    SQLiteConnector.db = "./sc2bcd"
     
     let team = Team()
     let zone = Zone()

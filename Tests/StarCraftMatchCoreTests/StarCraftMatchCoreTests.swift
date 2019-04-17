@@ -78,4 +78,49 @@ final class StarCraftMatchCoreTests: XCTestCase {
             XCTAssert(isSuccess, "*** 删除战队赛区数据失败")
         }
     }
+    
+    func testTeamInZone() {
+        configDatabase()
+        
+        deleteAllTeamRecords()
+        deleteAllZoneRecords()
+        deleteAllTeamZoneRecords()
+        
+        let teams = [("熊猫战队", "A"), ("北京战队", "B"), ("昆明战队", "C"), ("斗鱼战队", "D")]
+        // 批量保存数据
+        save(teamPack: teams) { (isSuccess) in
+            XCTAssert(isSuccess, "*** 批量插入或更新战队数据失败")
+        }
+        
+        let t = Team()
+        try? t.findAll()
+        let teamRows = t.rows()
+        
+        let zones = ["美洲", "太平洋", "亚洲"]
+        // 批量添加记录
+        save(zones: zones) { (isSuccess) in
+            XCTAssert(isSuccess, "*** 批量插入或更新赛区数据失败")
+        }
+        
+        let z = Zone()
+        try? z.findAll()
+        let zoneRows = z.rows()
+        
+        let pack = (zoneRows[0].id, [teamRows[0].id, teamRows[2].id])
+        
+        save(zoneTeamPack: pack) { (isSuccess) in
+            XCTAssert(isSuccess, "*** 批量插入或更新赛区-战队关系数据失败")
+        }
+        
+        let x = TeamInZone()
+        let newPack = x.request(teamInZone: zoneRows[0].id)
+        XCTAssert(newPack != nil && newPack!.values.count == 2, "*** 该赛区-战队关系数据不存在")
+        
+        remove(teamZoneID: newPack!.values[0].recordID) { (isSuccess) in
+            XCTAssert(isSuccess, "*** 删除赛区-战队关系数据失败")
+        }
+        
+        let deletePack = x.request(teamInZone: zoneRows[0].id)
+        XCTAssert(deletePack != nil && deletePack!.values.count == 1, "*** 删除赛区-战队关系数据失败")
+    }
 }

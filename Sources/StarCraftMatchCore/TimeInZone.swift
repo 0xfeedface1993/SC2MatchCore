@@ -10,13 +10,13 @@ import SQLiteStORM
 
 /// 赛区-战队关系
 public class TeamInZone: SQLiteStORM {
-    var id: Int = 0
+    public var id: Int = 0
     /// 战队id
-    var teamid: Int = 0
+    public var teamid: Int = 0
     /// 赛区id
-    var zoneid: Int = 0
+    public var zoneid: Int = 0
     /// 删除标记
-    var activeState: Int = 0
+    public var activeState: Int = 0
     
     override open func table() -> String {
         return "team_relate_zone"

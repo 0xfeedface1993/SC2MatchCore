@@ -10,11 +10,11 @@ import SQLiteStORM
 
 /// 赛区
 public class Zone: SQLiteStORM {
-    var id: Int = 0
+    public var id: Int = 0
     /// 赛区名
-    var name: String = ""
+    public var name: String = ""
     /// 删除标记
-    var activeState: Int = 0
+    public var activeState: Int = 0
     
     override open func table() -> String {
         return "zone"

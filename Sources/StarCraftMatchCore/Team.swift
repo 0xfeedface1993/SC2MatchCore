@@ -12,13 +12,13 @@ public typealias ExcuteCompletion = (Bool) -> ()
 
 /// 战队
 public class Team: SQLiteStORM {
-    var id: Int = 0
+    public var id: Int = 0
     /// 名称
-    var name: String = ""
+    public var name: String = ""
     /// 负责人（默认经理）
-    var mananger: String = ""
+    public var mananger: String = ""
     /// 删除标记
-    var activeState: Int = 0
+    public var activeState: Int = 0
     
     override open func table() -> String {
         return "team"

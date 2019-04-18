@@ -92,10 +92,10 @@ public func save(zoneTeamPack: (zoneID: Int, teamsID: [Int]), completion: Excute
     for x in zoneTeamPack.teamsID {
         do {
             let r = TeamInZone()
-            try r.find([("teamid", "\(x)")])
+            try r.find([("teamid", "\(x)"), ("activeState", "1")])
             let rows = r.rows()
             for y in rows {
-                remove(teamID: y.id) { (ok) in
+                remove(teamZoneID: y.id) { (ok) in
                     if ok {
                         
                     }
@@ -126,12 +126,7 @@ public func save(zoneTeamPack: (zoneID: Int, teamsID: [Int]), completion: Excute
                 }
             }
         }
-        
-        for i in rows {
-            i.activeState = 0
-            try i.save()
-        }
-        
+                
         saveNonSave(packs: (zoneID: zoneTeamPack.zoneID, teamsID: unsignedTeam))
         
         completion?(true)

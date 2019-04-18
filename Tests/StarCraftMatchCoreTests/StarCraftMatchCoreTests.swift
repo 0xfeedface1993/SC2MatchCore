@@ -109,6 +109,9 @@ final class StarCraftMatchCoreTests: XCTestCase {
             XCTAssert(isSuccess, "*** 批量插入或更新赛区-战队关系数据失败")
         }
         
+        let y = read(teamvZoneState: 1)
+        XCTAssert(y.count == 2, "*** 该赛区-战队关系数据不正确")
+        
         let x = TeamInZone()
         let newPack = x.request(teamInZone: zoneRows[0].id)
         XCTAssert(newPack != nil && newPack!.values.count == 2, "*** 该赛区-战队关系数据不存在")

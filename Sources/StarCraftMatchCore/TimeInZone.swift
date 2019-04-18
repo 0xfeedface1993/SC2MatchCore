@@ -139,3 +139,18 @@ public func remove(teamZoneID: Int, completion: ExcuteCompletion?) {
         completion?(false)
     }
 }
+
+/// 读取指定状态的赛区-战队数据，无排序
+///
+/// - Parameter teamState: 状态
+/// - Returns: 赛区-战队关系数组数据
+public func read(teamvZoneState: Int) -> [TeamInZone] {
+    do {
+        let x = TeamInZone()
+        try x.find([("activeState", "\(teamvZoneState)")])
+        return x.rows()
+    } catch {
+        log(error: error.localizedDescription)
+        return []
+    }
+}

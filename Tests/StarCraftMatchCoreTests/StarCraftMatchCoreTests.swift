@@ -30,10 +30,9 @@ final class StarCraftMatchCoreTests: XCTestCase {
             XCTAssert(isSuccess, "*** 批量插入或更新赛区数据失败")
         }
         
-        let z = Zone()
-        try? z.findAll()
+        let rows = read(zoneState: 1)
+        XCTAssert(rows.count == 3, "*** 批量插入或更新赛区数据失败")
         
-        let rows = z.rows()
         // 更新数据
         update(zone: rows[0].id, name: "大风州") { (isSuccess) in
             XCTAssert(isSuccess, "*** 批量更新赛区数据失败")
@@ -64,9 +63,8 @@ final class StarCraftMatchCoreTests: XCTestCase {
             XCTAssert(isSuccess, "*** 批量插入或更新战队数据失败")
         }
         
-        let t = Team()
-        try? t.findAll()
-        let rows = t.rows()
+        let rows = read(teamState: 1)
+        XCTAssert(rows.count == 4, "*** 批量插入或更新战队数据失败")
         
         // 更新战队信息
         update(team: rows[0].id, value: (team: "bilibili闪电", manager: "大风车")) { (isSuccess) in
@@ -92,9 +90,8 @@ final class StarCraftMatchCoreTests: XCTestCase {
             XCTAssert(isSuccess, "*** 批量插入或更新战队数据失败")
         }
         
-        let t = Team()
-        try? t.findAll()
-        let teamRows = t.rows()
+        let teamRows = read(teamState: 1)
+        XCTAssert(teamRows.count == 4, "*** 批量插入或更新战队数据失败")
         
         let zones = ["美洲", "太平洋", "亚洲"]
         // 批量添加记录

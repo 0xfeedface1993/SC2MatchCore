@@ -163,3 +163,18 @@ public func update(team: Int, value: (team: String, manager: String), completion
         completion?(false)
     }
 }
+
+/// 读取指定状态的战队数据，无排序
+///
+/// - Parameter teamState: 状态
+/// - Returns: 战队数组数据
+public func read(teamState: Int) -> [Team] {
+    do {
+        let zone = Team()
+        try zone.find([("activeState", "\(teamState)")])
+        return zone.rows()
+    } catch {
+        log(error: error.localizedDescription)
+        return []
+    }
+}

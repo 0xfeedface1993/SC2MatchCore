@@ -160,3 +160,19 @@ public func update(zone: Int, name: String, completion: ExcuteCompletion?) {
         completion?(false)
     }
 }
+
+
+/// 读取指定状态的赛区数据，无排序
+///
+/// - Parameter zoneState: 有效状态，1为有效状态
+/// - Returns: 赛区数据数组
+public func read(zoneState: Int) -> [Zone] {
+    do {
+        let zone = Zone()
+        try zone.find([("activeState", "\(zoneState)")])
+        return zone.rows()
+    } catch {
+        log(error: error.localizedDescription)
+        return []
+    }
+}

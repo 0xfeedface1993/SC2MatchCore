@@ -88,6 +88,28 @@ public func save(zoneTeamPack: (zoneID: Int, teamsID: [Int]), completion: Excute
             }
         })
     }
+    
+    for x in zoneTeamPack.teamsID {
+        do {
+            let r = TeamInZone()
+            try r.find([("teamid", "\(x)")])
+            let rows = r.rows()
+            for y in rows {
+                remove(teamID: y.id) { (ok) in
+                    if ok {
+                        
+                    }
+                }
+            }
+        } catch StORMError.noRecordFound {
+            
+        } catch {
+            log(error: error.localizedDescription)
+            completion?(false)
+            break
+        }
+    }
+    
     do {
         try data.find([("zoneid", "\(zoneTeamPack.zoneID)")])
         let originRows = data.rows()

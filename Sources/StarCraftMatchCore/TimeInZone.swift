@@ -157,6 +157,27 @@ public func remove(teamZoneID: Int, completion: ExcuteCompletion?) {
     }
 }
 
+/// 根据战队和战区删除记录
+///
+/// - Parameters:
+///   - teamID: 战队id
+///   - zoneID: 赛区id
+///   - completion: 执行回调，成功返回true
+public func remove(teamID: Int, zoneID: Int, completion: ExcuteCompletion?) {
+    let data = TeamInZone()
+    do {
+        try data.find([("teamid", "\(teamID)"), ("zoneid", "\(zoneID)")])
+        data.activeState = 0
+        try data.save()
+        log(message: "------ delete team-zone: \(data.id), state: \(data.activeState)")
+        completion?(true)
+    } catch {
+        print(error)
+        log(error: error.localizedDescription)
+        completion?(false)
+    }
+}
+
 /// 读取指定状态的赛区-战队数据，无排序
 ///
 /// - Parameter teamState: 状态

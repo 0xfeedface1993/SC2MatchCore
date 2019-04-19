@@ -52,7 +52,7 @@ public class TeamInZone: SQLiteStORM {
             for item in self.rows() {
                 let team = Team()
                 try? team.get(item.teamid)
-                guard team.id != 0 else { continue }
+                guard team.id != 0, team.activeState > 0 else { continue }
                 teams.append((item.id, team))
             }
             
@@ -126,7 +126,7 @@ public func save(zoneTeamPack: (zoneID: Int, teamsID: [Int]), completion: Excute
                 }
             }
         }
-                
+        
         saveNonSave(packs: (zoneID: zoneTeamPack.zoneID, teamsID: unsignedTeam))
         
         completion?(true)

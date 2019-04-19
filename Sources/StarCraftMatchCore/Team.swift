@@ -108,6 +108,34 @@ public func remove(teamID: Int, completion: ExcuteCompletion?) {
     }
 }
 
+/// 批量删除战队，根据id
+///
+/// - Parameters:
+///   - teamsID: 多个战队id，数组
+///   - completion: 执行回调，成功返回true
+public func remove(teamsID: [Int], completion: ExcuteCompletion?) {
+    if teamsID.count <= 0 {
+        completion?(true)
+        return
+    }
+    
+    for i in teamsID {
+        let data = Team()
+        do {
+            try data.update(data: [("activeState", 0)], idValue: i)
+            try data.get(i)
+            log(message: "------ delete team: \(data.name), \(data.mananger), state: \(data.activeState)")
+        } catch {
+            print(error)
+            log(error: error.localizedDescription)
+            completion?(false)
+            return
+        }
+    }
+    
+    completion?(true)
+}
+
 /// 删除战队，根据名称删除
 ///
 /// - Parameters:

@@ -106,6 +106,32 @@ public func remove(zoneID: Int, completion: ExcuteCompletion?) {
     }
 }
 
+/// 删除多个赛区，根据id删除
+///
+/// - Parameters:
+///   - zonesID: 多个赛区ID
+///   - completion: 执行回调，成功返回true
+public func remove(zonesID: [Int], completion: ExcuteCompletion?) {
+    if zonesID.count <= 0 {
+        completion?(true)
+        return
+    }
+    for i in zonesID {
+        let data = Zone()
+        do {
+            try data.update(data: [("activeState", 0)], idValue: i)
+            try data.get(i)
+            log(message: "------ delete zone: \(data.name), state: \(data.activeState)")
+        } catch {
+            print(error)
+            log(error: error.localizedDescription)
+            completion?(false)
+            return
+        }
+    }
+    completion?(true)
+}
+
 /// 删除赛区，根据名称删除
 ///
 /// - Parameters:

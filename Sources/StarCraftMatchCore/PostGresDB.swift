@@ -66,6 +66,52 @@ public class PPlayer: PostgresStORM {
     }
 }
 
+public class PGroup: PostgresStORM {
+    public var id: Int = 0
+    public var name: String = ""
+    public var shortname: String = ""
+    public var scoreak: Float64 = 0
+    public var scorepl: Float64 = 0
+    public var founded: Date?
+    public var disbanded: Date?
+    public var active: Bool = false
+    public var homepage: String = ""
+    public var lp_name: String = ""
+    public var is_team: Bool = false
+    public var is_manual: Bool = false
+    public var meanrating: Float64 = 0
+    
+    override open func table() -> String {
+        return "\"group\""
+    }
+    
+    override public func to(_ this: StORMRow) {
+        id = this.data["id"] as? Int ?? 0
+        name = this.data["name"] as? String ?? ""
+        shortname = this.data["shortname"] as? String ?? ""
+        scoreak = this.data["scoreak"] as? Float64 ?? 0
+        scorepl = this.data["scorepl"] as? Float64 ?? 0
+        founded = this.data["founded"] as? Date
+        disbanded = this.data["disbanded"] as? Date
+        active = this.data["active"] as? Bool ?? false
+        homepage = this.data["homepage"] as? String ?? ""
+        lp_name = this.data["lp_name"] as? String ?? ""
+        is_team = this.data["is_team"] as? Bool ?? false
+        is_manual = this.data["is_manual"] as? Bool ?? false
+        meanrating = this.data["meanrating"] as? Float64 ?? 0
+    }
+    
+    public func rows() -> [PGroup] {
+        var rows = [PGroup]()
+        for i in 0..<self.results.rows.count {
+            let item = PGroup()
+            item.to(self.results.rows[i])
+            rows.append(item)
+        }
+        return rows
+    }
+}
+
 public func readTop10Player() {
     let data = PPlayer()
     do {
@@ -90,14 +136,14 @@ public func find(player: String, race: String, nation: String) -> PPlayer? {
     }
 }
 
-//public func find(team: String) -> PPlayer? {
-//    let data = PPlayer()
-//    do {
-//        try data.find([("tag", player)])
-//        print(">>>?>>> \(data.id), \(data.tag)")
-//        return data
-//    } catch {
-//        log(error: error.localizedDescription)
-//        return nil
-//    }
-//}
+public func find(team: String, lpname: String) -> PGroup? {
+    let data = PGroup()
+    do {
+        try data.select(whereclause: "name = $1 or name = $2 or shortname = $2 or shortname = $1 or lp_name = $1 or lp_name = $2", params: [lpname, team], orderby: ["name"])
+        print(">>>?>>> \(data.id), \(data.name)")
+        return data
+    } catch {
+        log(error: error.localizedDescription)
+        return nil
+    }
+}

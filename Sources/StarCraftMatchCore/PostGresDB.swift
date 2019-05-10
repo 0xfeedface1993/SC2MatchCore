@@ -112,6 +112,70 @@ public class PGroup: PostgresStORM {
     }
 }
 
+public class PEvent: PostgresStORM {
+    public var id: Int = 0
+    public var name: String = ""
+    public var parent_id: Int = 0
+    public var lft: Int = 0
+    public var rgt: Int = 0
+    public var closed: Bool = false
+    public var big: Bool = false
+    public var noprint: Bool = false
+    public var fullname: String = ""
+    public var homepage: String = ""
+    public var lp_name: String = ""
+    public var tlpd_id: Int = 0
+    public var tlpd_db: Int = 0
+    public var tl_thread: Int = 0
+    public var prizepool: Bool = false
+    public var earliest: Date?
+    public var latest: Date?
+    public var category: String = ""
+    public var type: String = ""
+    public var idx: Int = 0
+    public var wcs_year: Int = 0
+    public var wcs_tier: Int = 0
+    
+    override open func table() -> String {
+        return "event"
+    }
+    
+    override public func to(_ this: StORMRow) {
+        id = this.data[""] as? Int ?? 0
+        name = this.data[""] as? String ?? ""
+        parent_id = this.data[""] as? Int ?? 0
+        lft = this.data[""] as? Int ?? 0
+        rgt = this.data[""] as? Int ?? 0
+        closed = this.data[""] as? Bool ?? false
+        big = this.data[""] as? Bool ?? false
+        noprint = this.data[""] as? Bool ?? false
+        fullname = this.data[""] as? String ?? ""
+        homepage = this.data[""] as? String ?? ""
+        lp_name = this.data[""] as? String ?? ""
+        tlpd_id = this.data[""] as? Int ?? 0
+        tlpd_db = this.data[""] as? Int ?? 0
+        tl_thread = this.data[""] as? Int ?? 0
+        prizepool = this.data[""] as? Bool ?? false
+        earliest = this.data[""] as? Date
+        latest = this.data[""] as? Date
+        category = this.data[""] as? String ?? ""
+        type = this.data[""] as? String ?? ""
+        idx = this.data[""] as? Int ?? 0
+        wcs_year = this.data[""] as? Int ?? 0
+        wcs_tier = this.data[""] as? Int ?? 0
+    }
+    
+    public func rows() -> [PEvent] {
+        var rows = [PEvent]()
+        for i in 0..<self.results.rows.count {
+            let item = PEvent()
+            item.to(self.results.rows[i])
+            rows.append(item)
+        }
+        return rows
+    }
+}
+
 public func readTop10Player() {
     let data = PPlayer()
     do {
@@ -138,9 +202,40 @@ public func find(player: String, race: String, nation: String) -> PPlayer? {
 
 public func find(team: String, lpname: String) -> PGroup? {
     let data = PGroup()
+    if team.isEmpty, team.isEmpty {
+        return nil
+    }
+    
+    var whereclause : String!
+    var params = [String]()
+    
+    if team.isEmpty {
+        whereclause = "name = $1 or shortname = $1"
+        params = [lpname]
+    } else if lpname.isEmpty {
+        whereclause = "name = $1 or shortname = $1"
+        params = [team]
+    }   else    {
+        whereclause = "name = $1 or name = $2 or shortname = $2 or shortname = $1 or lp_name = $1 or lp_name = $2"
+        params = [lpname, team]
+    }
+    
     do {
-        try data.select(whereclause: "name = $1 or name = $2 or shortname = $2 or shortname = $1 or lp_name = $1 or lp_name = $2", params: [lpname, team], orderby: ["name"])
+        try data.select(whereclause: whereclause, params: params, orderby: ["name"])
         print(">>>?>>> \(data.id), \(data.name)")
+        return data
+    } catch {
+        log(error: error.localizedDescription)
+        return nil
+    }
+}
+
+public func find(eventname: String) -> PEvent? {
+    let data = PEvent()
+    do {
+        print("<<<<<< \(eventname)")
+        try data.find([("fullname", eventname)])
+        print(">>>?>>> \(data.id), \(data.fullname) \(data.name)")
         return data
     } catch {
         log(error: error.localizedDescription)

@@ -10,15 +10,17 @@ import SQLiteStORM
 
 /// 初始化数据库
 public func configDatabase() {
-    SQLiteConnector.db = "./sc2bcd"
+    SQLiteConnector.db = "./sc2bcde"
     
     let team = Team()
     let zone = Zone()
     let teamInZone = TeamInZone()
+    let match = Match()
     do {
         try team.setupTable()
         try zone.setupTable()
         try teamInZone.setupTable()
+        try match.setupTable()
     } catch {
         print(error)
     }

@@ -18,7 +18,27 @@ public func configurePostgresDB() {
     PostgresConnector.port        = 5432
 }
 
+public protocol MatchResultX: Codable {
+    
+}
+
 public class PPlayer: PostgresStORM {
+    public struct PlayerResult : MatchResultX {
+        public var id: Int
+        public var tag: String
+        public var birthday: Date?
+        public var mcnum: Int
+        public var tlpd_id: Int
+        public var tlpd_db: Int
+        public var lp_name: String
+        public var sc2e_id: Int
+        public var country: String
+        public var dom_val: Float64
+        public var dom_start_id: Int
+        public var dom_end_id: Int
+        public var current_rating_id: Int
+        public var romanized_name: String
+    }
     public var id: Int = 0
     public var tag: String = ""
     public var birthday: Date?
@@ -64,9 +84,41 @@ public class PPlayer: PostgresStORM {
         }
         return rows
     }
+    
+    public func transformResult() -> PlayerResult {
+        return PlayerResult(id: self.id,
+                            tag: self.tag,
+                            birthday: self.birthday,
+                            mcnum: self.mcnum,
+                            tlpd_id: self.tlpd_id,
+                            tlpd_db: self.tlpd_db,
+                            lp_name: self.lp_name,
+                            sc2e_id: self.sc2e_id,
+                            country: self.country,
+                            dom_val: self.dom_val,
+                            dom_start_id: self.dom_start_id,
+                            dom_end_id: self.dom_end_id,
+                            current_rating_id: self.current_rating_id,
+                            romanized_name: self.romanized_name)
+    }
 }
 
 public class PGroup: PostgresStORM {
+    public struct GroupResult: MatchResultX {
+        public var id: Int
+        public var name: String
+        public var shortname: String
+        public var scoreak: Float64
+        public var scorepl: Float64
+        public var founded: Date?
+        public var disbanded: Date?
+        public var active: Bool
+        public var homepage: String
+        public var lp_name: String
+        public var is_team: Bool
+        public var is_manual: Bool
+        public var meanrating: Float64
+    }
     public var id: Int = 0
     public var name: String = ""
     public var shortname: String = ""
@@ -110,6 +162,22 @@ public class PGroup: PostgresStORM {
         }
         return rows
     }
+    
+    public func transformResult() -> GroupResult {
+        return GroupResult(id: self.id,
+                           name: self.name,
+                           shortname: self.shortname,
+                           scoreak: self.scoreak,
+                           scorepl: self.scorepl,
+                           founded: self.founded,
+                           disbanded: self.disbanded,
+                           active: self.active,
+                           homepage: self.homepage,
+                           lp_name: self.lp_name,
+                           is_team: self.is_team,
+                           is_manual: self.is_manual,
+                           meanrating: self.meanrating)
+    }
 }
 
 public class PEvent: PostgresStORM {
@@ -141,28 +209,28 @@ public class PEvent: PostgresStORM {
     }
     
     override public func to(_ this: StORMRow) {
-        id = this.data[""] as? Int ?? 0
-        name = this.data[""] as? String ?? ""
-        parent_id = this.data[""] as? Int ?? 0
-        lft = this.data[""] as? Int ?? 0
-        rgt = this.data[""] as? Int ?? 0
-        closed = this.data[""] as? Bool ?? false
-        big = this.data[""] as? Bool ?? false
-        noprint = this.data[""] as? Bool ?? false
-        fullname = this.data[""] as? String ?? ""
-        homepage = this.data[""] as? String ?? ""
-        lp_name = this.data[""] as? String ?? ""
-        tlpd_id = this.data[""] as? Int ?? 0
-        tlpd_db = this.data[""] as? Int ?? 0
-        tl_thread = this.data[""] as? Int ?? 0
-        prizepool = this.data[""] as? Bool ?? false
-        earliest = this.data[""] as? Date
-        latest = this.data[""] as? Date
-        category = this.data[""] as? String ?? ""
-        type = this.data[""] as? String ?? ""
-        idx = this.data[""] as? Int ?? 0
-        wcs_year = this.data[""] as? Int ?? 0
-        wcs_tier = this.data[""] as? Int ?? 0
+        id = this.data["id"] as? Int ?? 0
+        name = this.data["name"] as? String ?? ""
+        parent_id = this.data["parent_id"] as? Int ?? 0
+        lft = this.data["lft"] as? Int ?? 0
+        rgt = this.data["rgt"] as? Int ?? 0
+        closed = this.data["closed"] as? Bool ?? false
+        big = this.data["big"] as? Bool ?? false
+        noprint = this.data["noprint"] as? Bool ?? false
+        fullname = this.data["fullname"] as? String ?? ""
+        homepage = this.data["homepage"] as? String ?? ""
+        lp_name = this.data["lp_name"] as? String ?? ""
+        tlpd_id = this.data["tlpd_id"] as? Int ?? 0
+        tlpd_db = this.data["tlpd_db"] as? Int ?? 0
+        tl_thread = this.data["tl_thread"] as? Int ?? 0
+        prizepool = this.data["prizepool"] as? Bool ?? false
+        earliest = this.data["earliest"] as? Date
+        latest = this.data["latest"] as? Date
+        category = this.data["category"] as? String ?? ""
+        type = this.data["type"] as? String ?? ""
+        idx = this.data["idx"] as? Int ?? 0
+        wcs_year = this.data["wcs_year"] as? Int ?? 0
+        wcs_tier = this.data["wcs_tier"] as? Int ?? 0
     }
     
     public func rows() -> [PEvent] {
@@ -192,7 +260,7 @@ public func find(player: String, race: String, nation: String) -> PPlayer? {
     let data = PPlayer()
     do {
         try data.find([("tag", player), ("race", race), ("country", nation)])
-        print(">>>?>>> \(data.id), \(data.tag)")
+        print(">>>>>> plyer id: \(data.id), tag: \(data.tag)")
         return data
     } catch {
         log(error: error.localizedDescription)
@@ -222,7 +290,7 @@ public func find(team: String, lpname: String) -> PGroup? {
     
     do {
         try data.select(whereclause: whereclause, params: params, orderby: ["name"])
-        print(">>>?>>> \(data.id), \(data.name)")
+        print(">>>>>> team id: \(data.id), name: \(data.name)")
         return data
     } catch {
         log(error: error.localizedDescription)
